@@ -1,5 +1,5 @@
 // ============================================
-// SUPABASE — используем другое имя, чтобы не было конфликта
+// SUPABASE
 // ============================================
 const SB_URL = 'https://nnltklrgemdoldwnlehg.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHRrbHJnZW1kb2xkd25sZWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzU5NTgsImV4cCI6MjEwMzE1MTk1OH0.b_Pl-enHhNtOjSezWRBagZ8zQPKYqkfSuW_fqHMpB_4';
@@ -96,7 +96,7 @@ function renderMasters(list) {
         const tg = m.telegram_username ? `https://t.me/${m.telegram_username.replace('@','')}` : '#';
 
         return `
-        <div class="master-card" onclick="window.location.href='master.html?id=${m.id}'" style="cursor:pointer;">
+        <div class="master-card" data-id="${m.id}">
             <div class="master-photo-wrap">${photo}${verified}</div>
             <div class="master-body">
                 <div class="master-name">${m.name}</div>
@@ -106,13 +106,23 @@ function renderMasters(list) {
                 </div>
                 <div class="master-district">📍 ${m.districts?.name || 'Одесса'}</div>
                 <div class="master-price">от ${m.price_from || '—'} грн</div>
-                <div class="master-actions" onclick="event.stopPropagation()">
+                <div class="master-actions">
                     <a href="tel:${m.phone}" class="btn-call">Позвонить</a>
                     <a href="${tg}" target="_blank" class="btn-tg">Telegram</a>
                 </div>
             </div>
         </div>`;
     }).join('');
+
+    // Навешиваем клики через JS — работает и на телефоне, и на компе
+    document.querySelectorAll('.master-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Если клик был по ссылке или кнопке внутри — не переходим
+            if (e.target.closest('a') || e.target.closest('.master-actions')) return;
+            const id = this.dataset.id;
+            if (id) window.location.href = 'master.html?id=' + id;
+        });
+    });
 }
 
 function showErr(msg) {

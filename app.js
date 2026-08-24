@@ -96,7 +96,7 @@ function renderMasters(list) {
         const tg = m.telegram_username ? `https://t.me/${m.telegram_username.replace('@','')}` : '#';
 
         return `
-        <div class="master-card">
+        <div class="master-card" onclick="window.location.href='master.html?id=${m.id}'" style="cursor:pointer;">
             <div class="master-photo-wrap">${photo}${verified}</div>
             <div class="master-body">
                 <div class="master-name">${m.name}</div>
@@ -106,7 +106,7 @@ function renderMasters(list) {
                 </div>
                 <div class="master-district">📍 ${m.districts?.name || 'Одесса'}</div>
                 <div class="master-price">от ${m.price_from || '—'} грн</div>
-                <div class="master-actions">
+                <div class="master-actions" onclick="event.stopPropagation()">
                     <a href="tel:${m.phone}" class="btn-call">Позвонить</a>
                     <a href="${tg}" target="_blank" class="btn-tg">Telegram</a>
                 </div>

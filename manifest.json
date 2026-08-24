@@ -9,14 +9,9 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192/E85D04/FFFFFF?text=RG",
+      "src": "icon.svg",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://via.placeholder.com/512/E85D04/FFFFFF?text=RG",
-      "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ]
 }

@@ -25,6 +25,7 @@ async function init() {
         await loadCats();
         await loadDists();
         await loadMasters();
+        initGridClicks(); // Навешиваем клик ОДИН раз
     } catch (e) {
         console.error(e);
         showErr('Ошибка подключения к базе');
@@ -96,7 +97,7 @@ function renderMasters(list) {
         const tg = m.telegram_username ? `https://t.me/${m.telegram_username.replace('@','')}` : '#';
 
         return `
-        <div class="master-card" data-id="${m.id}">
+        <article class="master-card" data-id="${m.id}">
             <div class="master-photo-wrap">${photo}${verified}</div>
             <div class="master-body">
                 <div class="master-name">${m.name}</div>
@@ -111,17 +112,46 @@ function renderMasters(list) {
                     <a href="${tg}" target="_blank" class="btn-tg">Telegram</a>
                 </div>
             </div>
-        </div>`;
+        </article>`;
     }).join('');
+}
 
-    // Навешиваем клики через JS — работает и на телефоне, и на компе
-    document.querySelectorAll('.master-card').forEach(card => {
-        card.addEventListener('click', function(e) {
-            // Если клик был по ссылке или кнопке внутри — не переходим
-            if (e.target.closest('a') || e.target.closest('.master-actions')) return;
-            const id = this.dataset.id;
-            if (id) window.location.href = 'master.html?id=' + id;
-        });
+// ============================================
+// КЛИК ПО КАРТОЧКЕ — Event Delegation (один раз)
+// ============================================
+function initGridClicks() {
+    const grid = document.getElementById('masters-grid');
+    if (!grid) return;
+
+    grid.addEventListener('click', function(e) {
+        // Если клик по ссылке — ничего не делаем, пусть ссылка работает
+        if (e.target.closest('a')) {
+            console.log('Link clicked, ignoring card navigation');
+            return;
+        }
+
+        // Ищем ближайшую карточку
+        const card = e.target.closest('.master-card');
+        if (!card) {
+            console.log('No card found for click');
+            return;
+        }
+
+        const id = card.dataset.id;
+        console.log('Card clicked, id:', id);
+
+        if (id) {
+            window.location.href = 'master.html?id=' + id;
+        }
+    });
+
+    // Для мобильных — touch тоже ловим
+    grid.addEventListener('touchend', function(e) {
+        if (e.target.closest('a')) return;
+        const card = e.target.closest('.master-card');
+        if (card && card.dataset.id) {
+            window.location.href = 'master.html?id=' + card.dataset.id;
+        }
     });
 }
 

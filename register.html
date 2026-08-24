@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E85D04">
+    <title>RemGo — Регистрация мастера</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --orange: #E85D04;
+            --orange-dark: #D00000;
+            --graphite: #2B2D42;
+            --concrete: #F4F4F5;
+            --green: #27AE60;
+            --text: #1A1A1A;
+            --text-light: #6B7280;
+            --white: #FFFFFF;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
+            background: var(--concrete);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 16px; }
+
+        /* Шапка */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid #E5E7EB;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--graphite);
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+        .logo span { color: var(--orange); }
+
+        /* Герой */
+        .hero {
+            background: var(--graphite);
+            color: var(--white);
+            padding: 40px 0 32px;
+            text-align: center;
+        }
+        .hero h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .hero p { font-size: 15px; color: #9CA3AF; }
+
+        /* Форма */
+        .form-section { padding: 32px 0 60px; }
+        .form-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .form-group label .req { color: var(--orange); }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            font-size: 16px;
+            font-family: inherit;
+            background: var(--white);
+            color: var(--text);
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--orange);
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* Фото */
+        .photo-upload {
+            border: 2px dashed #E5E7EB;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .photo-upload:hover { border-color: var(--orange); background: #FFF7ED; }
+        .photo-upload.has-image {
+            border-style: solid;
+            border-color: var(--green);
+            background: #F0FDF4;
+        }
+        .photo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 12px;
+            display: none;
+            border: 3px solid var(--white);
+            box-shadow: var(--shadow);
+        }
+        .photo-placeholder {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        #file-input { display: none; }
+
+        /* Кнопка */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-submit:hover { background: var(--orange-dark); }
+        .btn-submit:disabled {
+            background: #D1D5DB;
+            cursor: not-allowed;
+        }
+
+        /* Сообщения */
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            display: none;
+        }
+        .alert-error { background: #FFF5F5; color: #D00000; border: 1px solid #FECACA; }
+        .alert-success { background: #F0FDF4; color: #166534; border: 1px solid #86EFAC; }
+
+        /* Футер */
+        .footer {
+            background: var(--white);
+            border-top: 1px solid #E5E7EB;
+            padding: 24px 0;
+            text-align: center;
+        }
+        .footer p { font-size: 14px; color: var(--text-light); }
+        .footer a { color: var(--orange); text-decoration: none; font-weight: 600; }
+
+        /* Адаптив */
+        @media (min-width: 640px) {
+            .hero h1 { font-size: 28px; }
+            .form-card { padding: 36px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="index.html" class="logo">Rem<span>Go</span></a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Стать мастером на RemGo</h1>
+            <p>Заполните анкету — мы проверим и опубликуем ваш профиль</p>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <div class="container">
+            <div class="form-card">
+                <div class="alert alert-error" id="alert-error"></div>
+                <div class="alert alert-success" id="alert-success">
+                    ✅ Заявка отправлена! Мы проверим ваш профиль в течение 24 часов и свяжемся в Telegram для подтверждения.
+                </div>
+
+                <form id="reg-form">
+                    <div class="form-group">
+                        <label>Имя и фамилия <span class="req">*</span></label>
+                        <input type="text" id="name" placeholder="Александр Ковалёв" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Телефон <span class="req">*</span></label>
+                        <input type="tel" id="phone" placeholder="+380671234567" required>
+                        <small>Клиенты будут звонить по этому номеру</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telegram <span class="req">*</span></label>
+                        <input type="text" id="telegram" placeholder="@username" required>
+                        <small>Например: @sanya_santehnik</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Категория <span class="req">*</span></label>
+                        <select id="category" required>
+                            <option value="">Выберите...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Район работы <span class="req">*</span></label>
+                        <select id="district" required>
+                            <option value="">Выберите...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Цена от (грн) <span class="req">*</span></label>
+                        <input type="number" id="price" placeholder="300" min="50" required>
+                        <small>Минимальная стоимость выезда/часа</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>О себе <span class="req">*</span></label>
+                        <textarea id="description" placeholder="Опыт работы, чем занимаетесь, гарантии..." required></textarea>
+                        <small>Минимум 50 символов</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Фото профиля</label>
+                        <div class="photo-upload" id="photo-box" onclick="document.getElementById('file-input').click()">
+                            <img id="photo-preview" class="photo-preview" alt="Preview">
+                            <div class="photo-placeholder" id="photo-icon">📷</div>
+                            <div id="photo-text">Нажмите, чтобы загрузить фото</div>
+                        </div>
+                        <input type="file" id="file-input" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btn-submit">Отправить на модерацию</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Уже есть профиль? <a href="index.html">Найти заказы</a></p>
+            <p style="margin-top:8px">© 2026 RemGo. Одесса.</p>
+        </div>
+    </footer>
+
+    <script>
+        const SB_URL = 'https://nnltklrgemdoldwnlehg.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHRrbHJnZW1kb2xkd25sZWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzU5NTgsImV4cCI6MjEwMzE1MTk1OH0.b_Pl-enHhNtOjSezWRBagZ8zQPKYqkfSuW_fqHMpB_4';
+        const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+        let photoFile = null;
+        let photoUrl = null;
+
+        // Загрузка категорий и районов
+        async function loadOptions() {
+            const [{ data: cats }, { data: dists }] = await Promise.all([
+                sb.from('categories').select('*').order('display_order'),
+                sb.from('districts').select('*').eq('is_active', true).order('display_order')
+            ]);
+
+            const catSel = document.getElementById('category');
+            cats.forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id;
+                o.textContent = c.name;
+                catSel.appendChild(o);
+            });
+
+            const distSel = document.getElementById('district');
+            dists.forEach(d => {
+                const o = document.createElement('option');
+                o.value = d.id;
+                o.textContent = d.name;
+                distSel.appendChild(o);
+            });
+        }
+
+        // Превью фото
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showError('Фото слишком большое. Максимум 2 МБ.');
+                return;
+            }
+            photoFile = file;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = document.getElementById('photo-preview');
+                img.src = ev.target.result;
+                img.style.display = 'block';
+                document.getElementById('photo-icon').style.display = 'none';
+                document.getElementById('photo-text').textContent = file.name;
+                document.getElementById('photo-box').classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('alert-error');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('alert-success').style.display = 'none';
+        }
+        function showSuccess() {
+            document.getElementById('alert-error').style.display = 'none';
+            document.getElementById('alert-success').style.display = 'block';
+            document.getElementById('reg-form').reset();
+            document.getElementById('photo-preview').style.display = 'none';
+            document.getElementById('photo-icon').style.display = 'block';
+            document.getElementById('photo-text').textContent = 'Нажмите, чтобы загрузить фото';
+            document.getElementById('photo-box').classList.remove('has-image');
+            photoFile = null;
+            photoUrl = null;
+        }
+
+        // Отправка
+        document.getElementById('reg-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
+            try {
+                const name = document.getElementById('name').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const telegram = document.getElementById('telegram').value.trim();
+                const category = document.getElementById('category').value;
+                const district = document.getElementById('district').value;
+                const price = parseInt(document.getElementById('price').value);
+                const description = document.getElementById('description').value.trim();
+
+                // Валидация
+                if (!name || !phone || !telegram || !category || !district || !price || !description) {
+                    throw new Error('Заполните все обязательные поля');
+                }
+                if (description.length < 50) {
+                    throw new Error('Описание слишком короткое (минимум 50 символов)');
+                }
+                if (!telegram.startsWith('@')) {
+                    throw new Error('Telegram должен начинаться с @');
+                }
+
+                // Загрузка фото
+                if (photoFile) {
+                    const fileName = Date.now() + '_' + photoFile.name.replace(/[^a-z0-9.]/gi, '_');
+                    const { data: upData, error: upError } = await sb.storage
+                        .from('avatars')
+                        .upload(fileName, photoFile, { contentType: photoFile.type });
+
+                    if (upError) throw new Error('Ошибка загрузки фото: ' + upError.message);
+
+                    const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
+                    photoUrl = urlData.publicUrl;
+                }
+
+                // Сохранение профиля
+                const { error } = await sb.from('profiles').insert({
+                    name,
+                    phone,
+                    telegram_username: telegram,
+                    category_id: category,
+                    district_id: district,
+                    price_from: price,
+                    description,
+                    photo_url: photoUrl,
+                    is_active: false,
+                    is_verified: false
+                });
+
+                if (error) throw new Error('Ошибка сохранения: ' + error.message);
+
+                showSuccess();
+
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Отправить на модерацию';
+            }
+        });
+
+        loadOptions();
+    </script>
+</body>
+</html>

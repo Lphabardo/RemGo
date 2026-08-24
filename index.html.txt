@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E85D04">
+    <title>RemGo — Найди мастера в Одессе</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ШАПКА -->
+    <header class="header">
+        <div class="container header-inner">
+            <a href="/" class="logo">Rem<span>Go</span></a>
+            <div class="city">📍 Одесса</div>
+            <a href="register.html" class="btn-header">Я мастер</a>
+        </div>
+    </header>
+
+    <!-- ГЕРОЙ -->
+    <section class="hero">
+        <div class="container">
+            <h1>Найдите проверенного мастера за 2 минуты</h1>
+            <p>Сантехники, электрики, плиточники и другие специалисты в Одессе</p>
+        </div>
+    </section>
+
+    <!-- КАТЕГОРИИ -->
+    <section class="categories">
+        <div class="container">
+            <h2>Выберите услугу</h2>
+            <div class="categories-grid" id="categories-grid">
+                <!-- Заполняется через JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ФИЛЬТРЫ -->
+    <section class="filters">
+        <div class="container">
+            <div class="filters-row">
+                <select id="filter-category">
+                    <option value="">Все категории</option>
+                </select>
+                <select id="filter-district">
+                    <option value="">Все районы</option>
+                </select>
+                <button id="btn-reset" class="btn-reset">Сбросить</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- СПИСОК МАСТЕРОВ -->
+    <section class="masters">
+        <div class="container">
+            <h2>Мастера <span id="masters-count"></span></h2>
+            <div class="masters-grid" id="masters-grid">
+                <div class="loading">Загрузка мастеров...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ДОСТАВКА БАННЕР -->
+    <div class="delivery-banner" id="delivery-banner">
+        <div class="delivery-content">
+            <span class="delivery-icon">🚚</span>
+            <div class="delivery-text">
+                <strong>Доставка стройматериалов</strong>
+                <span>Плитка, гипсокартон, цемент, краска — по Одессе</span>
+            </div>
+        </div>
+        <a href="https://t.me/ВАШ_ТЕЛЕГРАМ" target="_blank" class="btn-delivery">Заказать</a>
+        <button class="delivery-close" onclick="document.getElementById('delivery-banner').style.display='none'">×</button>
+    </div>
+
+    <!-- ПОДВАЛ -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 RemGo. Одесса.</p>
+            <p>Для мастеров: <a href="register.html">разместить профиль</a></p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

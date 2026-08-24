@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E85D04">
+    <title>RemGo — Профиль мастера</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .master-hero {
+            background: var(--white);
+            padding-bottom: 24px;
+        }
+        .master-hero-inner { position: relative; }
+        .master-cover {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #2B2D42 0%, #4A4C6A 100%);
+            position: relative;
+        }
+        .master-avatar-wrap {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--white);
+            background: var(--concrete);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .master-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .master-avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%);
+        }
+        .master-info {
+            text-align: center;
+            padding-top: 52px;
+            padding-bottom: 8px;
+        }
+        .master-info h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .master-info-meta {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .master-info-district {
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
+        /* Галерея */
+        .gallery-section {
+            padding: 20px 16px;
+            background: var(--white);
+            margin-top: 8px;
+        }
+        .gallery-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .gallery-grid {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+        }
+        .gallery-grid::-webkit-scrollbar { display: none; }
+        .gallery-item {
+            flex-shrink: 0;
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #E5E7EB;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Описание */
+        .about-section {
+            background: var(--white);
+            padding: 24px 16px;
+            margin-top: 8px;
+        }
+        .about-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .about-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text);
+            white-space: pre-line;
+        }
+
+        /* Цена и действия */
+        .action-section {
+            background: var(--white);
+            padding: 24px 16px;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .action-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--orange);
+            margin-bottom: 4px;
+        }
+        .action-price-note {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .action-btn-primary {
+            background: var(--orange);
+            color: var(--white);
+        }
+        .action-btn-secondary {
+            background: #E0F2FE;
+            color: #0369A1;
+        }
+
+        /* Форма заявки */
+        .order-section {
+            background: var(--white);
+            padding: 24px 16px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .order-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .order-section > p {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .order-form .form-group {
+            margin-bottom: 16px;
+        }
+        .order-form label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .order-form label .req { color: var(--orange); }
+        .order-form input,
+        .order-form textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .order-form input:focus,
+        .order-form textarea:focus {
+            outline: none;
+            border-color: var(--orange);
+        }
+        .order-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .btn-order {
+            width: 100%;
+            padding: 16px;
+            background: var(--graphite);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-order:disabled { background: #D1D5DB; }
+
+        /* Отзывы */
+        .reviews-section {
+            background: var(--white);
+            padding: 24px 16px;
+            margin-top: 8px;
+            margin-bottom: 80px;
+        }
+        .reviews-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .review-count {
+            font-size: 15px;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+        .review-card {
+            border-bottom: 1px solid #F3F4F6;
+            padding: 16px 0;
+        }
+        .review-card:last-child { border-bottom: none; }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .review-author {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .review-rating {
+            color: var(--orange);
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .review-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text);
+        }
+        .no-reviews {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+        }
+
+        /* Алерты */
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            display: none;
+        }
+        .alert-error { background: #FFF5F5; color: #D00000; border: 1px solid #FECACA; }
+        .alert-success { background: #F0FDF4; color: #166534; border: 1px solid #86EFAC; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="index.html" class="logo">Rem<span>Go</span></a>
+            <a href="index.html" class="btn-header">← Назад</a>
+        </div>
+    </header>
+
+    <div id="content">
+        <div class="loading" style="padding:60px; text-align:center;">Загрузка профиля...</div>
+    </div>
+
+    <!-- Баннер доставки -->
+    <div class="delivery-banner" id="delivery-banner">
+        <div class="delivery-content">
+            <span class="delivery-icon">🚚</span>
+            <div class="delivery-text">
+                <strong>Доставка стройматериалов</strong>
+                <span>Плитка, гипсокартон, цемент, краска — по Одессе</span>
+            </div>
+        </div>
+        <a href="https://t.me/ВАШ_ТЕЛЕГРАМ" target="_blank" class="btn-delivery">Заказать</a>
+        <button class="delivery-close" onclick="document.getElementById('delivery-banner').style.display='none'">×</button>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 RemGo. Одесса.</p>
+            <p><a href="index.html">← Вернуться к поиску мастеров</a></p>
+        </div>
+    </footer>
+
+    <script>
+        const SB_URL = 'https://nnltklrgemdoldwnlehg.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHRrbHJnZW1kb2xkd25sZWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzU5NTgsImV4cCI6MjEwMzE1MTk1OH0.b_Pl-enHhNtOjSezWRBagZ8zQPKYqkfSuW_fqHMpB_4';
+        const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+        // Получаем ID мастера из URL
+        const params = new URLSearchParams(window.location.search);
+        const masterId = params.get('id');
+
+        if (!masterId) {
+            document.getElementById('content').innerHTML = '<div class="loading" style="color:#D00000">Ошибка: мастер не найден</div>';
+        } else {
+            loadMaster();
+        }
+
+        async function loadMaster() {
+            const { data: master, error } = await sb
+                .from('profiles')
+                .select('*, categories(name, slug), districts(name, slug)')
+                .eq('id', masterId)
+                .eq('is_active', true)
+                .single();
+
+            if (error || !master) {
+                document.getElementById('content').innerHTML = '<div class="loading" style="color:#D00000">Мастер не найден или профиль на модерации</div>';
+                return;
+            }
+
+            // Загружаем отзывы
+            const { data: reviews } = await sb
+                .from('reviews')
+                .select('*')
+                .eq('profile_id', masterId)
+                .eq('is_approved', true)
+                .order('created_at', { ascending: false });
+
+            renderMaster(master, reviews || []);
+        }
+
+        function renderMaster(m, reviews) {
+            const tgLink = m.telegram_username ? `https://t.me/${m.telegram_username.replace('@','')}` : '#';
+            const photo = m.photo_url
+                ? `<img src="${m.photo_url}" alt="${m.name}" class="master-avatar" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'master-avatar-placeholder\\'>👷</div>'">`
+                : `<div class="master-avatar-placeholder">👷</div>`;
+
+            const gallery = (m.gallery && m.gallery.length)
+                ? `<div class="gallery-section">
+                    <h3>📷 Работы</h3>
+                    <div class="gallery-grid">${m.gallery.map(url => `<div class="gallery-item"><img src="${url}" loading="lazy"></div>`).join('')}</div>
+                   </div>`
+                : '';
+
+            const reviewsHtml = reviews.length
+                ? reviews.map(r => `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <span class="review-author">${r.author_name}</span>
+                            <span class="review-rating">★ ${r.rating}</span>
+                        </div>
+                        <div class="review-text">${r.text}</div>
+                    </div>
+                `).join('')
+                : '<div class="no-reviews">Пока нет отзывов. Будьте первым!</div>';
+
+            document.getElementById('content').innerHTML = `
+                <div class="master-hero">
+                    <div class="master-hero-inner">
+                        <div class="master-cover"></div>
+                        <div class="master-avatar-wrap">${photo}</div>
+                    </div>
+                    <div class="master-info">
+                        <h1>${m.name}</h1>
+                        <div class="master-info-meta">
+                            <span class="master-category" style="background:#FFF7ED; color:#D00000; font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px;">${m.categories?.name || 'Мастер'}</span>
+                            <span class="master-rating" style="background:#FEF9C3; color:#854D0E; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px;">★ ${m.rating} (${m.review_count})</span>
+                            ${m.is_verified ? '<span style="background:#F0FDF4; color:#166534; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px;">✓ Проверен</span>' : ''}
+                        </div>
+                        <div class="master-info-district">📍 ${m.districts?.name || 'Одесса'} • ${m.city}</div>
+                    </div>
+                </div>
+
+                ${gallery}
+
+                <div class="about-section">
+                    <h3>📝 О мастере</h3>
+                    <div class="about-text">${m.description || 'Описание отсутствует.'}</div>
+                </div>
+
+                <div class="action-section">
+                    <div class="action-price">от ${m.price_from || '—'} грн</div>
+                    <div class="action-price-note">Минимальная стоимость работы</div>
+                    <div class="action-buttons">
+                        <a href="tel:${m.phone}" class="action-btn action-btn-primary">📞 Позвонить</a>
+                        <a href="${tgLink}" target="_blank" class="action-btn action-btn-secondary">✈️ Telegram</a>
+                    </div>
+                </div>
+
+                <div class="order-section">
+                    <h3>📋 Оставить заявку мастеру</h3>
+                    <p>Опишите задачу — мастер свяжется с вами в ближайшее время</p>
+                    
+                    <div class="alert alert-error" id="alert-error"></div>
+                    <div class="alert alert-success" id="alert-success">
+                        ✅ Заявка отправлена! Мастер получит уведомление и свяжется с вами.
+                    </div>
+
+                    <form class="order-form" id="order-form" onsubmit="submitOrder(event, '${m.id}', '${m.category_id}')">
+                        <div class="form-group">
+                            <label>Ваше имя <span class="req">*</span></label>
+                            <input type="text" id="o-name" placeholder="Алексей" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон <span class="req">*</span></label>
+                            <input type="tel" id="o-phone" placeholder="+380671234567" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Адрес <span class="req">*</span></label>
+                            <input type="text" id="o-address" placeholder="ул. Дерибасовская, 1, кв. 5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание работы <span class="req">*</span></label>
+                            <textarea id="o-desc" placeholder="Нужно заменить смеситель в ванной, старый проржавел..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-order" id="btn-order">Отправить заявку</button>
+                    </form>
+                </div>
+
+                <div class="reviews-section">
+                    <h3>⭐ Отзывы <span class="review-count">(${reviews.length})</span></h3>
+                    ${reviewsHtml}
+                </div>
+            `;
+        }
+
+        async function submitOrder(e, masterId, catId) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-order');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
+            try {
+                const name = document.getElementById('o-name').value.trim();
+                const phone = document.getElementById('o-phone').value.trim();
+                const address = document.getElementById('o-address').value.trim();
+                const desc = document.getElementById('o-desc').value.trim();
+
+                if (!name || !phone || !address || !desc) {
+                    throw new Error('Заполните все поля');
+                }
+
+                const { error } = await sb.from('orders').insert({
+                    customer_name: name,
+                    customer_phone: phone,
+                    description: desc,
+                    address: address,
+                    master_id: masterId,
+                    category_id: catId,
+                    status: 'new'
+                });
+
+                if (error) throw new Error('Ошибка сохранения: ' + error.message);
+
+                document.getElementById('alert-error').style.display = 'none';
+                document.getElementById('alert-success').style.display = 'block';
+                document.getElementById('order-form').reset();
+
+            } catch (err) {
+                document.getElementById('alert-error').textContent = err.message;
+                document.getElementById('alert-error').style.display = 'block';
+                document.getElementById('alert-success').style.display = 'none';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Отправить заявку';
+            }
+        }
+    </script>
+</body>
+</html>

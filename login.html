@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E85D04">
+    <title>RemGo — Вход для мастеров</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --orange: #E85D04;
+            --orange-dark: #D00000;
+            --graphite: #2B2D42;
+            --concrete: #F4F4F5;
+            --text: #1A1A1A;
+            --text-light: #6B7280;
+            --white: #FFFFFF;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
+            background: var(--concrete);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .container { max-width: 420px; margin: 0 auto; padding: 0 16px; }
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid #E5E7EB;
+        }
+        .header-inner { display: flex; align-items: center; height: 60px; max-width: 800px; margin: 0 auto; padding: 0 16px; }
+        .logo { font-size: 24px; font-weight: 900; color: var(--graphite); text-decoration: none; letter-spacing: -1px; }
+        .logo span { color: var(--orange); }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 32px 28px;
+            margin-top: 48px;
+        }
+        .card h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+        .card p.sub { font-size: 14px; color: var(--text-light); margin-bottom: 24px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .form-group input:focus { outline: none; border-color: var(--orange); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-submit:hover { background: var(--orange-dark); }
+        .btn-submit:disabled { background: #D1D5DB; cursor: not-allowed; }
+
+        .alert {
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+            background: #FFF5F5;
+            color: #D00000;
+            border: 1px solid #FECACA;
+        }
+
+        .foot-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-light); }
+        .foot-link a { color: var(--orange); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">Rem<span>Go</span></a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h1>Вход в кабинет</h1>
+            <p class="sub">Для мастеров, у которых уже есть профиль на RemGo</p>
+
+            <div class="alert" id="alert-error"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-submit" id="btn-submit">Войти</button>
+            </form>
+
+            <p class="foot-link">Ещё нет профиля? <a href="register.html">Зарегистрироваться</a></p>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = 'https://nnltklrgemdoldwnlehg.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHRrbHJnZW1kb2xkd25sZWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzU5NTgsImV4cCI6MjEwMzE1MTk1OH0.b_Pl-enHhNtOjSezWRBagZ8zQPKYqkfSuW_fqHMpB_4';
+        const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+        function showError(msg) {
+            const el = document.getElementById('alert-error');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = 'Вход...';
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                showError('Неверный email или пароль');
+                btn.disabled = false;
+                btn.textContent = 'Войти';
+                return;
+            }
+            window.location.href = 'cabinet.html';
+        });
+    </script>
+</body>
+</html>

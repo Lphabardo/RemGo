@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E85D04">
+    <title>RemGo — Личный кабинет</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --orange: #E85D04;
+            --orange-dark: #D00000;
+            --graphite: #2B2D42;
+            --concrete: #F4F4F5;
+            --green: #27AE60;
+            --text: #1A1A1A;
+            --text-light: #6B7280;
+            --white: #FFFFFF;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
+            background: var(--concrete);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 16px; }
+
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid #E5E7EB;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        .logo { font-size: 24px; font-weight: 900; color: var(--graphite); text-decoration: none; letter-spacing: -1px; }
+        .logo span { color: var(--orange); }
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #E5E7EB;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .status-bar {
+            padding: 32px 0 0;
+        }
+        .status-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .status-badge {
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+        .status-active { background: #F0FDF4; color: #166534; }
+        .status-pending { background: #FEF9C3; color: #854D0E; }
+
+        .form-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+        .form-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            font-size: 16px;
+            font-family: inherit;
+            background: var(--white);
+            color: var(--text);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus { outline: none; border-color: var(--orange); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .btn-save {
+            width: 100%;
+            padding: 16px;
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-save:hover { background: var(--orange-dark); }
+        .btn-save:disabled { background: #D1D5DB; cursor: not-allowed; }
+
+        .alert {
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+        .alert-error { background: #FFF5F5; color: #D00000; border: 1px solid #FECACA; }
+        .alert-success { background: #F0FDF4; color: #166534; border: 1px solid #86EFAC; }
+
+        .loading { text-align: center; padding: 60px 0; color: var(--text-light); }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">Rem<span>Go</span></a>
+            <button class="btn-logout" id="logout-btn">Выйти</button>
+        </div>
+    </header>
+
+    <div class="container" id="app">
+        <div class="loading">Загрузка кабинета...</div>
+    </div>
+
+    <script>
+        const SB_URL = 'https://nnltklrgemdoldwnlehg.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHRrbHJnZW1kb2xkd25sZWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzU5NTgsImV4cCI6MjEwMzE1MTk1OH0.b_Pl-enHhNtOjSezWRBagZ8zQPKYqkfSuW_fqHMpB_4';
+        const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+        let currentProfile = null;
+
+        async function init() {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const { data: profile, error } = await sb.from('profiles')
+                .select('*, categories(name), districts(name)')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            if (error || !profile) {
+                document.getElementById('app').innerHTML =
+                    '<div class="loading" style="color:#D00000">Профиль не найден. Напишите нам в поддержку.</div>';
+                return;
+            }
+
+            currentProfile = profile;
+
+            const [{ data: cats }, { data: dists }] = await Promise.all([
+                sb.from('categories').select('*').order('display_order'),
+                sb.from('districts').select('*').eq('is_active', true).order('display_order')
+            ]);
+
+            renderForm(profile, cats, dists);
+        }
+
+        function renderForm(p, cats, dists) {
+            const statusHtml = p.is_active
+                ? '<span class="status-badge status-active">✓ Профиль опубликован</span>'
+                : '<span class="status-badge status-pending">На модерации</span>';
+
+            document.getElementById('app').innerHTML = `
+                <div class="status-bar">
+                    <div class="status-card">
+                        <div><strong>${p.name}</strong><div style="font-size:13px;color:var(--text-light)">Рейтинг: ★ ${p.rating || '—'} (${p.review_count || 0} отзывов)</div></div>
+                        ${statusHtml}
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h2>Мой профиль</h2>
+                    <div class="alert alert-error" id="alert-error"></div>
+                    <div class="alert alert-success" id="alert-success">✅ Сохранено</div>
+
+                    <form id="edit-form">
+                        <div class="form-group">
+                            <label>Имя и фамилия</label>
+                            <input type="text" id="f-name" value="${p.name || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон</label>
+                            <input type="tel" id="f-phone" value="${p.phone || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Telegram</label>
+                            <input type="text" id="f-telegram" value="${p.telegram_username || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Категория</label>
+                            <select id="f-category">
+                                ${cats.map(c => `<option value="${c.id}" ${c.id === p.category_id ? 'selected' : ''}>${c.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Район работы</label>
+                            <select id="f-district">
+                                ${dists.map(d => `<option value="${d.id}" ${d.id === p.district_id ? 'selected' : ''}>${d.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Цена от (грн)</label>
+                            <input type="number" id="f-price" value="${p.price_from || ''}" min="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label>О себе</label>
+                            <textarea id="f-description" required>${p.description || ''}</textarea>
+                        </div>
+                        <button type="submit" class="btn-save" id="btn-save">Сохранить изменения</button>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('edit-form').addEventListener('submit', saveProfile);
+        }
+
+        async function saveProfile(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            btn.textContent = 'Сохранение...';
+
+            const updates = {
+                name: document.getElementById('f-name').value.trim(),
+                phone: document.getElementById('f-phone').value.trim(),
+                telegram_username: document.getElementById('f-telegram').value.trim(),
+                category_id: document.getElementById('f-category').value,
+                district_id: document.getElementById('f-district').value,
+                price_from: parseInt(document.getElementById('f-price').value),
+                description: document.getElementById('f-description').value.trim()
+            };
+
+            const { error } = await sb.from('profiles').update(updates).eq('id', currentProfile.id);
+
+            const errEl = document.getElementById('alert-error');
+            const okEl = document.getElementById('alert-success');
+
+            if (error) {
+                errEl.textContent = 'Ошибка: ' + error.message;
+                errEl.style.display = 'block';
+                okEl.style.display = 'none';
+            } else {
+                okEl.style.display = 'block';
+                errEl.style.display = 'none';
+                currentProfile = { ...currentProfile, ...updates };
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Сохранить изменения';
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        });
+
+        init();
+    </script>
+</body>
+</html>

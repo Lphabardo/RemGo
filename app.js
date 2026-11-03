@@ -11,7 +11,7 @@ const ICONS = {
     'elektriki': '⚡',
     'otdelochniki': '🎨',
     'plitochniki': '🔲',
-    'mastera-na-chas': '🛠️',
+    'mastera-na-chas': '️',
     'mebelshchiki': '🪑'
 };
 
@@ -144,15 +144,7 @@ function initGridClicks() {
             window.location.href = 'master.html?id=' + id;
         }
     });
-
-    // Для мобильных — touch тоже ловим
-    grid.addEventListener('touchend', function(e) {
-        if (e.target.closest('a')) return;
-        const card = e.target.closest('.master-card');
-        if (card && card.dataset.id) {
-            window.location.href = 'master.html?id=' + card.dataset.id;
-        }
-    });
+    // УДАЛЕНО: обработчик touchend — он вызывал двойное срабатывание на мобильных
 }
 
 function showErr(msg) {

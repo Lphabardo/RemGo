@@ -1,10 +1,14 @@
-const CACHE_NAME = 'remgo-v1';
+const CACHE_NAME = 'remgo-v2'; // <-- Увеличили версию для сброса старого кэша
 const urlsToCache = [
   '/RemGo/',
   '/RemGo/index.html',
   '/RemGo/styles.css',
   '/RemGo/app.js',
   '/RemGo/register.html',
+  '/RemGo/master.html',
+  '/RemGo/login.html',
+  '/RemGo/cabinet.html',
+  '/RemGo/manifest.json',
   '/RemGo/icon.svg'
 ];
 
@@ -26,7 +30,6 @@ self.addEventListener('fetch', event => {
       .then(response => {
         if (response) return response;
         return fetch(event.request).catch(() => {
-          // Если сеть недоступна и нет в кэше — ничего не делаем
           return new Response('');
         });
       })

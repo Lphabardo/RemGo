@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#E85D04">
     <title>RemGo — Вход для мастеров</title>
-    
-    <!-- ВОТ ЭТИ 3 СТРОКИ ДОБАВЛЕНЫ: -->
     <link rel="manifest" href="manifest.json?v=3">
     <link rel="apple-touch-icon" sizes="180x180" href="icon.png?v=3">
     <link rel="icon" type="image/svg+xml" href="icon.svg?v=3">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -124,9 +121,12 @@
     </div>
 
     <script>
+        console.log('✅ Скрипт login.js начал загружаться');
+        
         const SB_URL = 'https://nnltklrgemdoldwnlehg.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHRrbHJnZW1kb2xkd25sZWhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1NzU5NTgsImV4cCI6MjEwMzE1MTk1OH0.b_Pl-enHhNtOjSezWRBagZ8zQPKYqkfSuW_fqHMpB_4';
         const sb = window.supabase.createClient(SB_URL, SB_KEY);
+        console.log('✅ Supabase клиент создан');
 
         function showError(msg) {
             const el = document.getElementById('alert-error');
@@ -134,28 +134,40 @@
             el.style.display = 'block';
         }
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-submit');
-            btn.disabled = true;
-            btn.textContent = 'Вход...';
+        const loginForm = document.getElementById('login-form');
+        console.log('✅ Форма найдена:', loginForm);
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                console.log('🚀 Форма отправлена! Предотвращаем перезагрузку...');
+                e.preventDefault(); // ЭТО ГЛАВНОЕ — запрещаем перезагрузку страницы
+                
+                const btn = document.getElementById('btn-submit');
+                btn.disabled = true;
+                btn.textContent = 'Вход...';
 
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
 
-            if (error) {
-                console.error("ПОЛНАЯ ОШИБКА SUPABASE:", error);
-                showError("Ошибка входа: " + error.message);
-                btn.disabled = false;
-                btn.textContent = 'Войти';
-                return;
-            }
-            
-            console.log("УСПЕХ! Данные сессии:", data);
-            window.location.href = 'cabinet.html';
-        });
+                console.log('📤 Пытаемся войти с email:', email);
+
+                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+                if (error) {
+                    console.error('❌ Ошибка входа:', error);
+                    showError('Ошибка: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Войти';
+                    return;
+                }
+                
+                console.log('✅ Успешный вход! Переход в кабинет...');
+                window.location.href = 'cabinet.html';
+            });
+            console.log('✅ Обработчик submit навешан на форму');
+        } else {
+            console.error('❌ Форма login-form НЕ НАЙДЕНА!');
+        }
     </script>
 </body>
 </html>

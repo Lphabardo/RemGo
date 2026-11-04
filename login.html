@@ -137,14 +137,18 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            const { error } = await sb.auth.signInWithPassword({ email, password });
+            // ИЗМЕНЕНИЕ ЗДЕСЬ: добавили data и вывод полной ошибки
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
             if (error) {
-                showError('Неверный email или пароль');
+                console.error("ПОЛНАЯ ОШИБКА SUPABASE:", error); // Покажет детальную ошибку в консоли (F12)
+                showError("Ошибка входа: " + error.message); // Покажет текст ошибки прямо на экране
                 btn.disabled = false;
                 btn.textContent = 'Войти';
                 return;
             }
+            
+            console.log("УСПЕХ! Данные сессии:", data);
             window.location.href = 'cabinet.html';
         });
     </script>

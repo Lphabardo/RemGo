@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#E85D04">
     <title>RemGo — Вход для мастеров</title>
+    
+    <!-- ДОБАВЛЕНЫ ИКОНКИ -->
+    <link rel="manifest" href="manifest.json?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon.png?v=3">
+    <link rel="icon" type="image/svg+xml" href="icon.svg?v=3">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -137,12 +143,11 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // ИЗМЕНЕНИЕ ЗДЕСЬ: добавили data и вывод полной ошибки
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
             if (error) {
-                console.error("ПОЛНАЯ ОШИБКА SUPABASE:", error); // Покажет детальную ошибку в консоли (F12)
-                showError("Ошибка входа: " + error.message); // Покажет текст ошибки прямо на экране
+                console.error("ПОЛНАЯ ОШИБКА SUPABASE:", error);
+                showError("Ошибка входа: " + error.message);
                 btn.disabled = false;
                 btn.textContent = 'Войти';
                 return;
